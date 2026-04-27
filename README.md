@@ -15,7 +15,7 @@ Important: this repo is **not** the canonical protocol. It is an example client/
 
 ## Reviewer Setup
 
-- Node: `20.20.2` (see `.nvmrc`)
+- Node: `24.12.0` (see `.nvmrc`)
 - Install: `npm install`
 - CI check: `npm run check`
 
