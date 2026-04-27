@@ -10,6 +10,7 @@
     "db:migrate": "node db/migrate.js",
     "mock:seed": "node scripts/mockSeed.js",
     "metadata:backfill": "node scripts/backfillMetadata.js",
+    "rebuild:native": "npm rebuild better-sqlite3",
     "build:web": "cd web && npm run build",
     "build:indexer": "cd indexer && npm run build",
     "build": "npm run build:web && npm run build:indexer",

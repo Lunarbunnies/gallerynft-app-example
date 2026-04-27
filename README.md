@@ -65,6 +65,28 @@ Then open:
 - `http://localhost:3000/`
 - `http://localhost:3000/frame/1`
 
+## Troubleshooting
+
+### `better-sqlite3` Node module version mismatch
+
+If you switch Node versions and see an error like:
+
+- `was compiled against a different Node.js version`
+- `NODE_MODULE_VERSION ...`
+
+rebuild native dependencies for the current Node version:
+
+```bash
+npm run rebuild:native
+```
+
+Then rerun:
+
+```bash
+npm run db:migrate
+npm run dev
+```
+
 ## Notes
 
 - Indexer consumes `mock/events.json` and applies idempotent upserts.
