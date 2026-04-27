@@ -1,0 +1,68 @@
+[
+  {
+    "type": "GalleryCreated",
+    "id": 1,
+    "galleryId": 1,
+    "owner": "0x14cde53ae7875449eb75e4fd0af3c86c1acb76e4",
+    "createdAt": 1777304201
+  },
+  {
+    "type": "GalleryFieldsUpdated",
+    "id": 2,
+    "galleryId": 1,
+    "title": "Gallery 1",
+    "description": "On-chain curated set 1",
+    "updatedAt": 1777304202
+  },
+  {
+    "type": "ItemAdded",
+    "id": 3,
+    "galleryId": 1,
+    "packedRefHex": "0x000000000000002105518e280f0b9bfc837844b955dd02cb4eb1a0bd3a000000000000000000000001",
+    "itemKey": "0xbcabd689ef40ed0d15361437fbdc03322da7189c176891308a25e15b1c47aa30",
+    "addedAt": 1777304302
+  },
+  {
+    "type": "ItemFieldsUpdated",
+    "id": 4,
+    "galleryId": 1,
+    "itemKey": "0xbcabd689ef40ed0d15361437fbdc03322da7189c176891308a25e15b1c47aa30",
+    "displayOrder": 1,
+    "label": "Featured Base NFT #1",
+    "note": "Base reference seed (may be ERC-1155 or ERC-721)."
+  },
+  {
+    "type": "ItemAdded",
+    "id": 5,
+    "galleryId": 1,
+    "packedRefHex": "0x000000000000000001a9b60950a3d0461c1430b9fcba57d284be4a8788000000000000000000000101",
+    "itemKey": "0xf213f500df151cb3d813b311159c977251a9a54e2e5650056e4352bb818fa996",
+    "addedAt": 1777304303
+  },
+  {
+    "type": "ItemFieldsUpdated",
+    "id": 6,
+    "galleryId": 1,
+    "itemKey": "0xf213f500df151cb3d813b311159c977251a9a54e2e5650056e4352bb818fa996",
+    "displayOrder": 2,
+    "label": "Featured ETH NFT #257",
+    "note": "Ethereum reference seed."
+  },
+  {
+    "type": "ItemAdded",
+    "id": 7,
+    "galleryId": 1,
+    "packedRefHex": "0x000000000000000001e22f47f5986c816e2e0519c200cbaf10aab3239b000000000000000000000002",
+    "itemKey": "0x37bcbd41462565d682a59eb3c26d0c6c01c3654742de9e7022ba4cb6ea2fffec",
+    "addedAt": 1777304304
+  },
+  {
+    "type": "ItemFieldsUpdated",
+    "id": 8,
+    "galleryId": 1,
+    "itemKey": "0x37bcbd41462565d682a59eb3c26d0c6c01c3654742de9e7022ba4cb6ea2fffec",
+    "displayOrder": 3,
+    "label": "Featured ETH NFT #2",
+    "note": "Ethereum reference seed."
+  }
+]

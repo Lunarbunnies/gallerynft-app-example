@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GalleryNFT Contract Overview</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+      }
+      h1, h2 {
+        line-height: 1.2;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>GalleryNFT Contract Overview</h1>
+      <p>This is a top-level view of the planned <code>GalleryNFT</code> contract.</p>
+
+      <h2>What It Is</h2>
+      <p><code>GalleryNFT</code> is an <code>ERC-721</code> contract where:</p>
+      <ol>
+        <li>One token equals one gallery.</li>
+        <li>The token owner (or approved operator) controls gallery edits.</li>
+        <li>Canonical gallery state lives on-chain.</li>
+      </ol>
+
+      <h2>Standard ERC-721 Surface</h2>
+      <p><code>GalleryNFT</code> keeps normal ERC-721 behavior, including:</p>
+      <ol>
+        <li>Ownership and transfer (<code>ownerOf</code>, <code>transferFrom</code>, <code>safeTransferFrom</code>)</li>
+        <li>Approvals (<code>approve</code>, <code>setApprovalForAll</code>, <code>getApproved</code>, <code>isApprovedForAll</code>)</li>
+        <li>Metadata identity (<code>name</code>, <code>symbol</code>, optional <code>tokenURI</code> for marketplace compatibility)</li>
+      </ol>
+      <p>Gallery curation data is not intended to depend on <code>tokenURI</code>. Curation state is stored in contract fields and emitted events.</p>
+
+      <h2>GalleryNFT Additions</h2>
+      <p>The contract adds gallery-specific write operations:</p>
+      <ol>
+        <li><code>createGallery(title, description)</code></li>
+        <li><code>setGalleryFields(galleryId, title, description)</code></li>
+        <li><code>addItem(galleryId, packedRef, displayOrder, label, note)</code></li>
+        <li><code>updateItemFields(galleryId, itemKey, displayOrder, label, note)</code></li>
+        <li><code>removeItem(galleryId, itemKey)</code></li>
+      </ol>
+      <p>And gallery-specific reads:</p>
+      <ol>
+        <li><code>getGallery(...)</code> / <code>getGalleryFields(...)</code></li>
+        <li><code>getGalleryItems(...)</code></li>
+        <li><code>getItem(...)</code> / <code>getItemFields(...)</code></li>
+        <li><code>getItemPackedRef(...)</code> / <code>getItemStatus(...)</code></li>
+      </ol>
+
+      <h2>Data Model (On-Chain)</h2>
+      <p>Gallery fields:</p>
+      <ol>
+        <li><code>title</code></li>
+        <li><code>description</code></li>
+        <li><code>createdAt</code></li>
+        <li><code>updatedAt</code></li>
+      </ol>
+      <p>Item fields:</p>
+      <ol>
+        <li><code>packedRef</code></li>
+        <li><code>itemKey = keccak256(packedRef)</code></li>
+        <li><code>addedAt</code></li>
+        <li><code>removedAt</code></li>
+        <li><code>displayOrder</code></li>
+        <li><code>label</code></li>
+        <li><code>note</code></li>
+      </ol>
+      <p><code>packedRef</code> supports cross-chain references (EVM + Tezos) using the shared encoding spec.</p>
+
+      <h2>Event-Driven Projection</h2>
+      <p>Indexer/database is a cache, not source of truth.</p>
+      <p>Core events:</p>
+      <ol>
+        <li><code>GalleryCreated</code></li>
+        <li><code>GalleryFieldsUpdated</code></li>
+        <li><code>ItemAdded</code></li>
+        <li><code>ItemFieldsUpdated</code></li>
+        <li><code>ItemRemoved</code></li>
+      </ol>
+      <p>The UI can rebuild state by replaying events and optionally verifying with read calls.</p>
+
+      <h2>Related Doc</h2>
+      <p>Detailed signatures are listed in <code>docs/contract-methods.md</code>.</p>
+    </main>
+  </body>
+</html>

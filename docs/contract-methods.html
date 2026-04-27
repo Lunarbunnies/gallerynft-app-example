@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GalleryNFT Contract Methods</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+      }
+      h1, h2, h3 {
+        line-height: 1.2;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>GalleryNFT Contract Methods</h1>
+      <p>This document lists the intended on-chain interface for the GalleryNFT ERC-721 contract.</p>
+      <p>It reflects the current mock-first data model and event schema used by the app/indexer.</p>
+      <p>High-level summary: <code>docs/contract-overview.md</code></p>
+
+      <h2>Write Functions</h2>
+      <ol>
+        <li><code>createGallery(title, description)</code><br />Emits: <code>GalleryCreated</code></li>
+        <li><code>setGalleryFields(galleryId, title, description)</code><br />Emits: <code>GalleryFieldsUpdated</code></li>
+        <li><code>addItem(galleryId, packedRef, displayOrder, label, note)</code><br />Emits: <code>ItemAdded</code> + <code>ItemFieldsUpdated</code></li>
+        <li><code>updateItemFields(galleryId, itemKey, displayOrder, label, note)</code><br />Emits: <code>ItemFieldsUpdated</code></li>
+        <li><code>removeItem(galleryId, itemKey)</code><br />Emits: <code>ItemRemoved</code></li>
+      </ol>
+
+      <h2>Events</h2>
+      <ol>
+        <li><code>GalleryCreated(galleryId, owner)</code></li>
+        <li><code>GalleryFieldsUpdated(galleryId, title, description)</code></li>
+        <li><code>ItemAdded(galleryId, itemKey, packedRef)</code></li>
+        <li><code>ItemFieldsUpdated(galleryId, itemKey, displayOrder, label, note)</code></li>
+        <li><code>ItemRemoved(galleryId, itemKey)</code></li>
+      </ol>
+
+      <h2>Read Functions</h2>
+      <h3>Gallery-level</h3>
+      <ol>
+        <li><code>ownerOf(galleryId) -&gt; address</code></li>
+        <li><code>getGallery(galleryId) -&gt; (title, description, createdAt, updatedAt, owner)</code></li>
+        <li><code>getGalleryFields(galleryId) -&gt; (title, description, createdAt, updatedAt)</code></li>
+        <li><code>getGalleryItems(galleryId) -&gt; itemKey[]</code> (active only, ordered by displayOrder or addedAt)</li>
+      </ol>
+
+      <h3>Item-level</h3>
+      <ol start="5">
+        <li><code>getItem(galleryId, itemKey) -&gt; (packedRef, addedAt, removedAt, displayOrder, label, note)</code></li>
+        <li><code>getItemFields(galleryId, itemKey) -&gt; (displayOrder, label, note)</code></li>
+        <li><code>getItemPackedRef(galleryId, itemKey) -&gt; packedRef</code></li>
+        <li><code>getItemStatus(galleryId, itemKey) -&gt; (addedAt, removedAt, isActive)</code></li>
+      </ol>
+
+      <h3>Batch helpers (optional but useful)</h3>
+      <ol start="9">
+        <li><code>getItems(galleryId, itemKeys[]) -&gt; Item[]</code></li>
+        <li><code>getItemFieldsBatch(galleryId, itemKeys[]) -&gt; (displayOrder[], label[], note[])</code></li>
+      </ol>
+    </main>
+  </body>
+</html>

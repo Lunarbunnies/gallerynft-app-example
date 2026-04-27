@@ -1,0 +1,2 @@
+ALTER TABLE gallery_items
+  MODIFY COLUMN token_uri LONGTEXT NULL;

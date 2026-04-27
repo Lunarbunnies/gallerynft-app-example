@@ -1,0 +1,2 @@
+ALTER TABLE gallery_items
+  MODIFY COLUMN image_url LONGTEXT NULL;
