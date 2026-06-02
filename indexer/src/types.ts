@@ -58,3 +58,47 @@ export type GalleryEvent =
   | ItemFieldsUpdatedEvent
   | ItemRemovedEvent
   | NoteUpdatedEvent;
+
+export type CheckpointEvent = {
+  type: "Checkpoint";
+  id: number;
+};
+
+export type ChainCollectionCreatedEvent = {
+  type: "CollectionCreated";
+  id: number;
+  collectionAddress: string;
+  creator: string;
+  name: string;
+  symbol: string;
+  createdAt: number;
+};
+
+export type ChainGalleryCreatedEvent = GalleryCreatedEvent & {
+  collectionAddress: string;
+};
+
+export type ChainGalleryFieldsUpdatedEvent = GalleryFieldsUpdatedEvent & {
+  collectionAddress: string;
+};
+
+export type ChainItemAddedEvent = ItemAddedEvent & {
+  collectionAddress: string;
+};
+
+export type ChainItemFieldsUpdatedEvent = ItemFieldsUpdatedEvent & {
+  collectionAddress: string;
+};
+
+export type ChainItemRemovedEvent = ItemRemovedEvent & {
+  collectionAddress: string;
+};
+
+export type ChainEvent =
+  | CheckpointEvent
+  | ChainCollectionCreatedEvent
+  | ChainGalleryCreatedEvent
+  | ChainGalleryFieldsUpdatedEvent
+  | ChainItemAddedEvent
+  | ChainItemFieldsUpdatedEvent
+  | ChainItemRemovedEvent;

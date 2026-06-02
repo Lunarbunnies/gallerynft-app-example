@@ -1,5 +1,5 @@
-import { GalleryEvent } from "../types";
+import { ChainEvent, GalleryEvent } from "../types";
 
 export interface Source {
-  getNextEvents(afterId: number, limit: number): Promise<GalleryEvent[]>;
+  getNextEvents(afterId: number, limit: number): Promise<Array<GalleryEvent | ChainEvent>>;
 }

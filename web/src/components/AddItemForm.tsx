@@ -2,6 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { BrowserProvider, Contract } from "ethers";
+import {
+  bytesToHex,
+  encodePackedRef,
+  hexToBytes,
+  kt1ToHashBytes20,
+} from "@onchain-gallery/shared";
+import {
+  GALLERY_NFT_ABI,
+  GALLERY_NFT_ADDRESS,
+  GALLERY_NFT_CHAIN_ID,
+  isWalletModeEnabled,
+} from "../lib/galleryContract";
 
 type Props = {
   galleryId: number;
@@ -14,6 +27,7 @@ function chainIdFromOpenSeaNetwork(network: string) {
   if (key === "sepolia") return "11155111";
   if (key === "base") return "8453";
   if (key === "matic" || key === "polygon") return "137";
+  if (key === "abstract") return "2741";
   return null;
 }
 
@@ -82,6 +96,56 @@ export function AddItemForm({ galleryId, onCreated }: Props) {
   const [autofillMessage, setAutofillMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const walletMode = isWalletModeEnabled();
+
+  function buildPackedRefHex() {
+    if (kind === "evm") {
+      const packed = encodePackedRef({
+        kind: "evm",
+        chainId: BigInt(chainId),
+        contractAddress,
+        tokenId: BigInt(tokenId),
+      });
+      return `0x${bytesToHex(packed)}`;
+    }
+
+    const contract = tezosContract.trim();
+    const contractHash = contract.startsWith("KT1")
+      ? kt1ToHashBytes20(contract)
+      : hexToBytes(contract);
+    const packed = encodePackedRef({
+      kind: "tezos",
+      tezosNet: Number(tezosNet),
+      contractHash,
+      tokenId: BigInt(tokenId),
+    });
+    return `0x${bytesToHex(packed)}`;
+  }
+
+  async function addOnChainItem() {
+    if (!window.ethereum) {
+      throw new Error("No EVM wallet found. Install MetaMask or another injected wallet.");
+    }
+
+    const provider = new BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const network = await provider.getNetwork();
+    if (Number(network.chainId) !== GALLERY_NFT_CHAIN_ID) {
+      throw new Error(`Wrong network. Switch wallet to chain ${GALLERY_NFT_CHAIN_ID}.`);
+    }
+
+    const signer = await provider.getSigner();
+    const contract = new Contract(GALLERY_NFT_ADDRESS, GALLERY_NFT_ABI, signer);
+    const order = displayOrder ? Number(displayOrder) : 0;
+    const tx = await contract.addItem(
+      BigInt(galleryId),
+      buildPackedRefHex(),
+      order,
+      label.trim(),
+      note.trim()
+    );
+    await tx.wait();
+  }
 
   function handleAutofill() {
     setAutofillMessage(null);
@@ -113,6 +177,10 @@ export function AddItemForm({ galleryId, onCreated }: Props) {
     setIsSubmitting(true);
 
     try {
+      if (walletMode) {
+        await addOnChainItem();
+      }
+
       const body =
         kind === "evm"
           ? {
@@ -238,6 +306,7 @@ export function AddItemForm({ galleryId, onCreated }: Props) {
               <option value="11155111">Sepolia (11155111)</option>
               <option value="8453">Base (8453)</option>
               <option value="137">Polygon (137)</option>
+              <option value="2741">Abstract (2741)</option>
             </select>
           </label>
           <label style={{ display: "grid", gap: "6px" }}>
@@ -329,7 +398,7 @@ export function AddItemForm({ galleryId, onCreated }: Props) {
           color: isSubmitting ? "var(--muted)" : "var(--bg)",
         }}
       >
-        {isSubmitting ? "Adding..." : "Add item"}
+        {isSubmitting ? "Adding..." : walletMode ? "Add item on-chain" : "Add item"}
       </button>
     </form>
   );

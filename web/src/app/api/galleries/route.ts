@@ -23,7 +23,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const galleryId = getNextGalleryId();
+    const requestedGalleryId = Number(body.galleryId);
+    const galleryId =
+      Number.isInteger(requestedGalleryId) && requestedGalleryId > 0
+        ? requestedGalleryId
+        : getNextGalleryId();
     const now = Math.floor(Date.now() / 1000);
     appendMockEvents([
       {

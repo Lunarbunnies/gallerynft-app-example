@@ -20,6 +20,22 @@ function isVideoUrl(url: string | null | undefined) {
   return /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
 }
 
+function getAnimationMime(metadata: any, animationUrl: string | null) {
+  const explicit = metadata?.animation_details?.format;
+  if (explicit) return String(explicit).toLowerCase();
+  const formats = Array.isArray(metadata?.formats) ? metadata.formats : [];
+  const rawAnimation = metadata?.animation_url || metadata?.animationUrl || metadata?.artifactUri || null;
+  const matched = formats.find((format: any) => {
+    if (!format?.uri) return false;
+    return format.uri === rawAnimation || resolveMediaUrl(format.uri) === animationUrl;
+  });
+  const rich = formats.find((format: any) => {
+    const mime = String(format?.mimeType || "").toLowerCase();
+    return mime.includes("html") || mime.includes("video") || mime.includes("svg");
+  });
+  return String(matched?.mimeType || rich?.mimeType || "").toLowerCase();
+}
+
 export function FrameViewer({
   items,
   galleryNote,
@@ -110,21 +126,23 @@ export function FrameViewer({
   }, [current]);
   const imageUrl = useMemo(() => resolveMediaUrl(current?.imageUrl), [current]);
   const imageIsVideo = useMemo(() => isVideoUrl(imageUrl), [imageUrl]);
+  const animationMime = useMemo(
+    () => getAnimationMime(current?.metadataJson as any, animationUrl),
+    [animationUrl, current]
+  );
   const isVideo = useMemo(() => {
     if (!animationUrl) return false;
-    const format = (current?.metadataJson as any)?.animation_details?.format?.toLowerCase?.();
-    if (format === "html") return false;
-    if (format === "mp4" || format === "video") return true;
+    if (animationMime.includes("html")) return false;
+    if (animationMime.includes("mp4") || animationMime.includes("video")) return true;
     if (/\.(html)(\?|#|$)/i.test(animationUrl)) return false;
     if (/\.(mp4|webm|mov)(\?|#|$)/i.test(animationUrl)) return true;
     return true;
-  }, [animationUrl, current]);
+  }, [animationMime, animationUrl]);
   const isHtml = useMemo(() => {
     if (!animationUrl) return false;
-    const format = (current?.metadataJson as any)?.animation_details?.format?.toLowerCase?.();
-    if (format === "html") return true;
+    if (animationMime.includes("html")) return true;
     return /\.(html)(\?|#|$)/i.test(animationUrl);
-  }, [animationUrl, current]);
+  }, [animationMime, animationUrl]);
   useEffect(() => {
     if (items.length === 0) return;
     if (playVideosToEnd && isVideo) return;

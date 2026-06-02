@@ -13,6 +13,7 @@ export function getPackedRefDisplay(packedRefHex: string) {
       "11155111": "Sepolia",
       "8453": "Base",
       "137": "Polygon",
+      "2741": "Abstract",
     };
     const chainName = nameMap[chainId] || `Chain ${chainId}`;
     const short = shortenHex(decoded.contractAddress);

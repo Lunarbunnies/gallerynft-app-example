@@ -5,11 +5,15 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "catchup": "node -r dotenv/config -r ts-node/register src/catchup.ts",
+    "dev:verifier": "nodemon --watch src --ext ts --exec node -r dotenv/config -r ts-node/register src/verifier.ts",
+    "start:verifier": "node -r dotenv/config dist/verifier.js"
   },
   "dependencies": {
     "@onchain-gallery/shared": "file:../shared",
     "dotenv": "^16.4.5",
+    "ethers": "^6.16.0",
     "mysql2": "^3.9.7"
   },
   "devDependencies": {

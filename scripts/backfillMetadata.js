@@ -81,6 +81,7 @@ async function main() {
       1: "https://eth-mainnet.g.alchemy.com/v2/",
       137: "https://polygon-mainnet.g.alchemy.com/v2/",
       8453: "https://base-mainnet.g.alchemy.com/v2/",
+      2741: "https://abstract-mainnet.g.alchemy.com/v2/",
     };
     const baseUrl = map[chainId];
     if (!baseUrl) {
@@ -159,6 +160,7 @@ async function main() {
       1: "https://eth-mainnet.g.alchemy.com/nft/v2/",
       137: "https://polygon-mainnet.g.alchemy.com/nft/v2/",
       8453: "https://base-mainnet.g.alchemy.com/nft/v2/",
+      2741: "https://abstract-mainnet.g.alchemy.com/nft/v2/",
     };
     const baseUrl = map[chainId];
     if (!baseUrl) throw new Error(`Unsupported chainId ${chainId}`);

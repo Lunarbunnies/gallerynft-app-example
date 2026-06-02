@@ -13,3 +13,10 @@ export function kt1ToHashBytes20(address: string): Uint8Array {
   }
   return decoded.subarray(KT1_PREFIX.length);
 }
+
+export function hashBytes20ToKt1(hash: Uint8Array): string {
+  if (hash.length !== 20) {
+    throw new Error("Tezos contract hash must be 20 bytes");
+  }
+  return bs58check.encode(Buffer.concat([KT1_PREFIX, Buffer.from(hash)]));
+}

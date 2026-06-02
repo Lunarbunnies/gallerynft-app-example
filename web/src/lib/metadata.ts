@@ -5,7 +5,16 @@ type Metadata = {
   description?: string;
   image?: string;
   image_url?: string;
+  artifactUri?: string;
+  displayUri?: string;
+  thumbnailUri?: string;
   animation_url?: string;
+  animation_details?: { format?: string };
+  created_by?: string;
+  artist?: string;
+  creators?: string[];
+  authors?: string[];
+  formats?: Array<{ uri?: string; mimeType?: string }>;
   attributes?: Array<{ trait_type?: string; value?: string | number }>;
 };
 
@@ -131,14 +140,44 @@ async function fetchJson(url: string) {
 }
 
 export function normalizeMetadata(metadata: Metadata) {
-  const image = metadata.image_url || metadata.image;
+  const image = metadata.image_url || metadata.image || metadata.displayUri || metadata.thumbnailUri;
   const imageUrl = image ? normalizeImageUrl(resolveUri(image)) : null;
+  const animationCandidate =
+    metadata.animation_url ||
+    metadata.artifactUri ||
+    metadata.formats?.find((format) => {
+      const mime = format.mimeType?.toLowerCase() || "";
+      return mime.includes("video") || mime.includes("html") || mime.includes("svg");
+    })?.uri ||
+    null;
+  const animationUrl = animationCandidate ? resolveUri(animationCandidate) : null;
+  const animationFormat = metadata.formats?.find((format) => {
+    if (!format.uri || !animationCandidate) return false;
+    return format.uri === animationCandidate || resolveUri(format.uri) === animationUrl;
+  });
+  const richFormat = metadata.formats?.find((format) => {
+    const mime = format.mimeType?.toLowerCase() || "";
+    return mime.includes("video") || mime.includes("html") || mime.includes("svg");
+  });
+  const artistAttribute = metadata.attributes?.find((attribute) => {
+    const trait = attribute.trait_type?.toLowerCase();
+    return trait === "artist" || trait === "creator" || trait === "created by";
+  });
+  const artist =
+    metadata.artist ||
+    metadata.created_by ||
+    metadata.creators?.join(", ") ||
+    metadata.authors?.join(", ") ||
+    (artistAttribute?.value !== undefined ? String(artistAttribute.value) : null);
 
   return {
     raw: metadata,
     name: metadata.name || null,
     description: metadata.description || null,
     imageUrl,
+    animationUrl,
+    animationMime: metadata.animation_details?.format || animationFormat?.mimeType || richFormat?.mimeType || null,
+    artist,
   };
 }
 
@@ -151,5 +190,35 @@ export async function fetchTokenMetadata(tokenUri: string) {
     metadata = await fetchJson(resolved);
   }
 
+  return normalizeMetadata(metadata);
+}
+
+export async function fetchTezosTokenMetadata(contractAddress: string, tokenId: string) {
+  const url = `https://api.tzkt.io/v1/tokens?contract=${encodeURIComponent(
+    contractAddress
+  )}&tokenId=${encodeURIComponent(tokenId)}&limit=1`;
+  const response = await fetch(url, {
+    headers: { Accept: "application/json" },
+    redirect: "manual",
+  });
+  if (!response.ok) {
+    throw new Error(`TzKT metadata fetch failed: ${response.status}`);
+  }
+  const rows = (await response.json()) as Array<{
+    metadata?: Metadata;
+    displayUri?: string;
+    artifactUri?: string;
+    thumbnailUri?: string;
+  }>;
+  const token = rows[0];
+  if (!token) {
+    throw new Error("Tezos token not found");
+  }
+  const metadata = {
+    ...(token.metadata || {}),
+    displayUri: token.metadata?.displayUri || token.displayUri,
+    artifactUri: token.metadata?.artifactUri || token.artifactUri,
+    thumbnailUri: token.metadata?.thumbnailUri || token.thumbnailUri,
+  };
   return normalizeMetadata(metadata);
 }

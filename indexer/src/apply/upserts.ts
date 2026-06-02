@@ -145,7 +145,7 @@ export async function upsertCheckpoint(
       `INSERT INTO indexer_checkpoints (source_name, last_event_id, updated_at)
        VALUES (?, ?, ?)
        ON CONFLICT(source_name) DO UPDATE SET
-         last_event_id = excluded.last_event_id,
+         last_event_id = MAX(indexer_checkpoints.last_event_id, excluded.last_event_id),
          updated_at = excluded.updated_at`,
       [sourceName, lastEventId, now]
     );
@@ -154,7 +154,9 @@ export async function upsertCheckpoint(
   await pool.execute(
     `INSERT INTO indexer_checkpoints (source_name, last_event_id, updated_at)
      VALUES (?, ?, ?)
-     ON DUPLICATE KEY UPDATE last_event_id = VALUES(last_event_id), updated_at = VALUES(updated_at)`,
+     ON DUPLICATE KEY UPDATE
+       last_event_id = GREATEST(last_event_id, VALUES(last_event_id)),
+       updated_at = VALUES(updated_at)`,
     [sourceName, lastEventId, now]
   );
 }

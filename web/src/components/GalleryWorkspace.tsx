@@ -2,10 +2,17 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { BrowserProvider, Contract } from "ethers";
 import { GalleryFieldsModal } from "./GalleryFieldsModal";
 import { AddItemModal } from "./AddItemModal";
 import { GalleryEditor } from "./GalleryEditor";
 import type { ChainGallery, ChainItem } from "../lib/chain";
+import {
+  GALLERY_NFT_ABI,
+  GALLERY_NFT_ADDRESS,
+  GALLERY_NFT_CHAIN_ID,
+  isWalletModeEnabled,
+} from "../lib/galleryContract";
 
 export function GalleryWorkspace({
   gallery,
@@ -32,6 +39,7 @@ export function GalleryWorkspace({
   const [isApplying, setIsApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [appliedMessage, setAppliedMessage] = useState<string | null>(null);
+  const walletMode = isWalletModeEnabled();
 
   const pendingCount = useMemo(() => {
     const itemCount = Object.keys(pendingItems).length;
@@ -44,6 +52,40 @@ export function GalleryWorkspace({
     setError(null);
     setAppliedMessage(null);
     try {
+      if (walletMode) {
+        if (!window.ethereum) {
+          throw new Error("No EVM wallet found. Install MetaMask or another injected wallet.");
+        }
+        const provider = new BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const network = await provider.getNetwork();
+        if (Number(network.chainId) !== GALLERY_NFT_CHAIN_ID) {
+          throw new Error(`Wrong network. Switch wallet to chain ${GALLERY_NFT_CHAIN_ID}.`);
+        }
+
+        const signer = await provider.getSigner();
+        const contract = new Contract(GALLERY_NFT_ADDRESS, GALLERY_NFT_ABI, signer);
+        if (pendingGallery) {
+          const tx = await contract.setGalleryFields(
+            BigInt(gallery.galleryId),
+            pendingGallery.title.trim(),
+            pendingGallery.description.trim()
+          );
+          await tx.wait();
+        }
+
+        for (const [itemKey, fields] of Object.entries(pendingItems)) {
+          const tx = await contract.updateItemFields(
+            BigInt(gallery.galleryId),
+            itemKey,
+            fields.displayOrder ?? 0,
+            fields.label.trim(),
+            fields.note.trim()
+          );
+          await tx.wait();
+        }
+      }
+
       const response = await fetch(`/api/galleries/${gallery.galleryId}/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +100,9 @@ export function GalleryWorkspace({
       }
       setPendingGallery(null);
       setPendingItems({});
-      setAppliedMessage("Changes applied. Syncing on-chain state...");
+      setAppliedMessage(
+        walletMode ? "Changes confirmed on-chain and cache updated." : "Changes applied. Syncing on-chain state..."
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to apply changes");
     } finally {
@@ -190,10 +234,13 @@ export function GalleryWorkspace({
             }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div style={{ fontWeight: 600 }}>Wallet confirmation (mock)</div>
+            <div style={{ fontWeight: 600 }}>
+              {walletMode ? "Wallet confirmation" : "Wallet confirmation (mock)"}
+            </div>
             <div>
-              This would submit on-chain updates to the GalleryNFT contract for all staged
-              changes.
+              {walletMode
+                ? "This will submit the staged GalleryNFT updates with your connected wallet."
+                : "This would submit on-chain updates to the GalleryNFT contract for all staged changes."}
             </div>
             <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
               <button
